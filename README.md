@@ -1,20 +1,20 @@
 # supabase-java
 A Java client for [Supabase](https://supabase.com/).
 
-### PostgREST
-Supports basic operations: INSERT, UPSERT, DELETE.
+### Features
 
-Most of the Horizontal Filtering features are also implemented.
+Currently, this library supports database operations only
+
+### Usage
+```java
+// Starting the client
+SupabaseRestClient supabase = new SupabaseRestClient(YOUR_SUPABASE_URL, YOUR_SUPABASE_KEY);
+// Inserting a new user to the table users
+supabase.insert("users", Insert.row().column("email", "user@email.com")
+                                     .column("username", "user123"));
+```
 
 #### Not implemented yet
-- Full Text search
-- Casting
-- Ordering
-- Limits and Pagination
-- Count
-- Singular or Plural
-- Custom Queries
-- Stored Procedures
-- Binary Output
-- OpenAPI Support
-
+- Authentication
+- Storage
+- ...
