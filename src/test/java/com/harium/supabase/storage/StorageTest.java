@@ -71,6 +71,13 @@ public class StorageTest {
 
     @Test
     @Ignore
+    public void testRemoveFile() throws IOException {
+        List<FileObject> response = supabase.storage().remove("bucket", "test.txt", "test1.txt");
+        assertFalse(response.isEmpty());
+    }
+
+    @Test
+    @Ignore
     public void testCreateFile() throws IOException {
         UploadResponse response = supabase.storage().upload("bucket/test.txt", new byte[]{1,2,3,4,5});
         assertNotNull(response.key);

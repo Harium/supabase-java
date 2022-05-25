@@ -3,6 +3,8 @@ package com.harium.supabase.storage;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.harium.supabase.RequestDecorator;
+import com.harium.supabase.common.MessageResponse;
+import com.harium.supabase.storage.payload.PrefixesRequest;
 import com.harium.supabase.storage.payload.UploadResponse;
 import okhttp3.*;
 
@@ -49,6 +51,23 @@ public class StorageFileAPI {
         ResponseBody responseBody = client.newCall(request).execute().body();
 
         Type fileListClass = new TypeToken<ArrayList<FileObject>>() {}.getType();
+        return gson.fromJson(responseBody.string(), fileListClass);
+    }
+
+    public List<FileObject> remove(String bucketId, String ... paths) throws IOException {
+        PrefixesRequest payload = new PrefixesRequest();
+        payload.prefixes = paths;
+
+        String json = gson.toJson(payload);
+
+        Request.Builder requestBuilder = buildRequest("", bucketId);
+        RequestBody body = RequestBody.create(json, JSON);
+
+        Request request = requestBuilder.delete(body).build();
+
+        ResponseBody responseBody = client.newCall(request).execute().body();
+
+        Type fileListClass = new TypeToken<ArrayList<MessageResponse>>() {}.getType();
         return gson.fromJson(responseBody.string(), fileListClass);
     }
 
