@@ -21,6 +21,8 @@ public class StorageAPI {
 
     private final StorageBucketAPI storageBucketAPI;
 
+    private final StorageFileAPI storageFileAPI;
+
     public StorageAPI(String baseUrl, RequestDecorator requestDecorator) {
         this.baseUrl = extractHost(baseUrl);
         this.requestDecorator = requestDecorator;
@@ -29,6 +31,7 @@ public class StorageAPI {
         gson = new Gson();
 
         storageBucketAPI = new StorageBucketAPI(this.baseUrl, httpsEnabled, client, gson, requestDecorator);
+        storageFileAPI = new StorageFileAPI(this.baseUrl, httpsEnabled, client, gson, requestDecorator);
     }
 
     private String extractHost(String baseUrl) {
@@ -65,4 +68,11 @@ public class StorageAPI {
     }
 
 
+    public List<FileObject> listFiles(String bucketId) throws IOException {
+        return storageFileAPI.listFiles(bucketId);
+    }
+
+    public List<FileObject> listFiles(String bucketId, SearchOptions options) throws IOException {
+        return storageFileAPI.listFiles(bucketId, options);
+    }
 }

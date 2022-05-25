@@ -9,8 +9,7 @@ import org.junit.Test;
 import java.io.IOException;
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 public class StorageTest {
 
@@ -59,6 +58,13 @@ public class StorageTest {
     public void testDeleteBucket() throws IOException {
         MessageResponse response = supabaseClient.storage().deleteBucket("hello");
         assertEquals("Successfully deleted", response.message);
+    }
+
+    @Test
+    //@Ignore
+    public void testListFiles() throws IOException {
+        List<FileObject> response = supabaseClient.storage().listFiles("example-bucket");
+        assertFalse(response.isEmpty());
     }
 
 }
