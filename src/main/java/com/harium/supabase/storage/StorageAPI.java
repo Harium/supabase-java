@@ -3,10 +3,7 @@ package com.harium.supabase.storage;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.harium.supabase.RequestDecorator;
-import okhttp3.HttpUrl;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.ResponseBody;
+import okhttp3.*;
 
 import java.io.IOException;
 import java.lang.reflect.Type;
@@ -14,6 +11,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class StorageAPI {
+
+    private static final MediaType JSON = MediaType.parse("application/json; charset=utf-8");
 
     private final RequestDecorator requestDecorator;
 
@@ -42,7 +41,7 @@ public class StorageAPI {
     }
 
     public List<Bucket> listBuckets() throws IOException {
-        Request.Builder requestBuilder = buildRequest("");
+        Request.Builder requestBuilder = buildBucketRequest("");
         Request request = requestBuilder.get().build();
 
         ResponseBody responseBody = client.newCall(request).execute().body();
@@ -52,14 +51,58 @@ public class StorageAPI {
     }
 
     public Bucket getBucket(String id) throws IOException {
-        Request.Builder requestBuilder = buildRequest(id);
+        Request.Builder requestBuilder = buildBucketRequest(id);
         Request request = requestBuilder.get().build();
 
         ResponseBody responseBody = client.newCall(request).execute().body();
         return gson.fromJson(responseBody.string(), Bucket.class);
     }
 
+    public Bucket createBucket(String id) throws IOException {
+        return createBucket(id, false);
+    }
+
+    public Bucket createBucket(String id, boolean isPublic) throws IOException {
+        Bucket data = new Bucket();
+        data.id = id;
+        data.name = id;
+        data.isPublic = isPublic;
+
+        String json = gson.toJson(data);
+
+        Request.Builder requestBuilder = buildBucketRequest("");
+        RequestBody body = RequestBody.create(json, JSON);
+
+        Request request = requestBuilder.post(body).build();
+
+        ResponseBody responseBody = client.newCall(request).execute().body();
+        return gson.fromJson(responseBody.string(), Bucket.class);
+    }
+
+    public MessageResponse emptyBucket(String id) throws IOException {
+        Request.Builder requestBuilder = buildBucketRequest(id, "empty");
+        RequestBody body = RequestBody.create(null, new byte[0]);
+
+        Request request = requestBuilder.post(body).build();
+
+        ResponseBody responseBody = client.newCall(request).execute().body();
+
+        return gson.fromJson(responseBody.string(), MessageResponse.class);
+    }
+
+    public MessageResponse deleteBucket(String id) throws IOException {
+        Request.Builder requestBuilder = buildBucketRequest(id);
+        Request request = requestBuilder.delete().build();
+        ResponseBody responseBody = client.newCall(request).execute().body();
+
+        return gson.fromJson(responseBody.string(), MessageResponse.class);
+    }
+
     protected HttpUrl buildBucketUrl(String bucketId) {
+        return buildBucketUrl(bucketId, "");
+    }
+
+    protected HttpUrl buildBucketUrl(String bucketId, String action) {
         HttpUrl.Builder builder = new HttpUrl.Builder()
                 .host(baseUrl)
                 .addPathSegment("storage")
@@ -70,6 +113,10 @@ public class StorageAPI {
             builder.addPathSegment(bucketId);
         }
 
+        if (action != null && !action.isEmpty()) {
+            builder.addPathSegment(action);
+        }
+
         if (httpsEnabled) {
             builder.scheme("https");
         }
@@ -77,8 +124,16 @@ public class StorageAPI {
         return builder.build();
     }
 
-    protected Request.Builder buildRequest(String bucketId) {
+    protected Request.Builder buildBucketRequest(String bucketId) {
         HttpUrl httpUrl = buildBucketUrl(bucketId);
+
+        Request.Builder builder = new Request.Builder();
+        requestDecorator.decorate(builder);
+        return builder.url(httpUrl);
+    }
+
+    protected Request.Builder buildBucketRequest(String bucketId, String action) {
+        HttpUrl httpUrl = buildBucketUrl(bucketId, action);
 
         Request.Builder builder = new Request.Builder();
         requestDecorator.decorate(builder);
