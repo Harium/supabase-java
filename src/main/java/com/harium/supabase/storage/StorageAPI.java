@@ -78,11 +78,15 @@ public class StorageAPI {
         return storageFileAPI.listFiles(bucketId, options);
     }
 
-    public List<FileObject> remove(String bucket, String ... paths) throws IOException {
-        return storageFileAPI.remove(bucket, paths);
+    public List<FileObject> remove(String bucketId, String ... paths) throws IOException {
+        return storageFileAPI.remove(bucketId, paths);
     }
 
     public UploadResponse upload(String path, byte[] data) throws IOException {
         return storageFileAPI.upload(path, data);
+    }
+
+    public byte[] download(String bucketId, String path) throws IOException {
+        return storageFileAPI.download(bucketId, path);
     }
 }

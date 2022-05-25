@@ -54,6 +54,18 @@ public class StorageFileAPI {
         return gson.fromJson(responseBody.string(), fileListClass);
     }
 
+    public byte[] download(String bucketId, String path) throws IOException {
+        Request.Builder requestBuilder = buildRequest("", bucketId, path);
+        Request request = requestBuilder.get().build();
+
+        Response response = client.newCall(request).execute();
+        if (!response.isSuccessful()) {
+            return null;
+        }
+        ResponseBody responseBody = response.body();
+        return responseBody.bytes();
+    }
+
     public List<FileObject> remove(String bucketId, String ... paths) throws IOException {
         PrefixesRequest payload = new PrefixesRequest();
         payload.prefixes = paths;

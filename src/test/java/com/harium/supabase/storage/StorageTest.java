@@ -83,4 +83,11 @@ public class StorageTest {
         assertNotNull(response.key);
     }
 
+    @Test
+    @Ignore
+    public void testDownloadFile() throws IOException {
+        byte[] response = supabase.storage().download("bucket", "test.txt");
+        assertNotNull(response);
+    }
+
 }
