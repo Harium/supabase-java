@@ -1,21 +1,28 @@
 package com.harium.supabase;
 
-import com.harium.supabase.database.DatabaseClient;
+import com.harium.supabase.database.DatabaseAPI;
+import com.harium.supabase.storage.StorageAPI;
 import okhttp3.Request;
 
 public class SupabaseClient implements RequestDecorator {
 
     private final String supabaseKey;
 
-    private final DatabaseClient databaseClient;
+    private final DatabaseAPI databaseAPI;
+    private final StorageAPI storageAPI;
 
     public SupabaseClient(String supabaseUrl, String supabaseKey) {
         this.supabaseKey = supabaseKey;
-        databaseClient = new DatabaseClient(supabaseUrl, this);
+        databaseAPI = new DatabaseAPI(supabaseUrl, this);
+        storageAPI = new StorageAPI(supabaseUrl, this);
     }
 
-    public DatabaseClient database() {
-        return databaseClient;
+    public DatabaseAPI database() {
+        return databaseAPI;
+    }
+
+    public StorageAPI storage() {
+        return storageAPI;
     }
 
     @Override

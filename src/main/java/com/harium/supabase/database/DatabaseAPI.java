@@ -6,11 +6,11 @@ import com.harium.supabase.RequestDecorator;
 import okhttp3.HttpUrl;
 import okhttp3.Request;
 
-public class DatabaseClient extends PostgrestClient {
+public class DatabaseAPI extends PostgrestClient {
 
     private final RequestDecorator requestDecorator;
 
-    public DatabaseClient(String supabaseUrl, RequestDecorator requestDecorator) {
+    public DatabaseAPI(String supabaseUrl, RequestDecorator requestDecorator) {
         super(supabaseUrl);
         this.requestDecorator = requestDecorator;
     }
