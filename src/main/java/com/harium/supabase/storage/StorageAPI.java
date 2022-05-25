@@ -2,6 +2,8 @@ package com.harium.supabase.storage;
 
 import com.google.gson.Gson;
 import com.harium.supabase.RequestDecorator;
+import com.harium.supabase.common.MessageResponse;
+import com.harium.supabase.storage.payload.UploadResponse;
 import okhttp3.OkHttpClient;
 
 import java.io.IOException;
@@ -74,5 +76,9 @@ public class StorageAPI {
 
     public List<FileObject> listFiles(String bucketId, SearchOptions options) throws IOException {
         return storageFileAPI.listFiles(bucketId, options);
+    }
+
+    public UploadResponse upload(String path, byte[] data) throws IOException {
+        return storageFileAPI.upload(path, data);
     }
 }

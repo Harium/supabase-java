@@ -3,6 +3,7 @@ package com.harium.supabase.storage;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.harium.supabase.RequestDecorator;
+import com.harium.supabase.storage.payload.UploadResponse;
 import okhttp3.*;
 
 import java.io.IOException;
@@ -51,59 +52,68 @@ public class StorageFileAPI {
         return gson.fromJson(responseBody.string(), fileListClass);
     }
 
-    public Bucket getBucket(String id) throws IOException {
-        Request.Builder requestBuilder = buildRequest(id);
-        Request request = requestBuilder.get().build();
-
-        ResponseBody responseBody = client.newCall(request).execute().body();
-        return gson.fromJson(responseBody.string(), Bucket.class);
+    public UploadResponse upload(String supabasePath, byte[] data) throws IOException {
+        return upload(supabasePath, null, data, true);
     }
 
-    public Bucket createBucket(String id) throws IOException {
-        return createBucket(id, false);
+    public UploadResponse upload(String supabasePath, FileOptions options, byte[] data) throws IOException {
+        return upload(supabasePath, options, data, true);
     }
 
-    public Bucket createBucket(String id, boolean isPublic) throws IOException {
-        Bucket data = new Bucket();
-        data.id = id;
-        data.name = id;
-        data.isPublic = isPublic;
+    public UploadResponse upload(String supabasePath, FileOptions options, byte[] data, boolean inferContentType) throws IOException {
+        if (options == null) {
+            options = new FileOptions();
+        }
 
-        String json = gson.toJson(data);
+        if (inferContentType) {
+            //options.contentType = "";
+            //options.contentType = MimeMapping.MimeUtility.GetMimeMapping(supabasePath);
+        }
 
-        Request.Builder requestBuilder = buildRequest("");
-        RequestBody body = RequestBody.create(json, JSON);
+        return uploadOrUpdate(supabasePath, options, data);
+    }
+
+    private UploadResponse uploadOrUpdate(String path, FileOptions options, byte[] data) throws IOException {
+        Request.Builder requestBuilder = buildRequest(path);
+        requestBuilder.addHeader("cache-control", "max-age="+options.cacheControl);
+        requestBuilder.addHeader("content-type", options.contentType);
+
+        if (options.upsert) {
+            requestBuilder.addHeader("x-upsert", Boolean.toString(options.upsert));
+        }
+
+        // Multipart format
+        RequestBody body = new MultipartBody.Builder()
+                .setType(MultipartBody.FORM)
+                .addFormDataPart("", "dummy.txt", RequestBody.create(data))
+                .build();
 
         Request request = requestBuilder.post(body).build();
 
         ResponseBody responseBody = client.newCall(request).execute().body();
-        return gson.fromJson(responseBody.string(), Bucket.class);
+        return gson.fromJson(responseBody.string(), UploadResponse.class);
     }
 
-    public MessageResponse emptyBucket(String id) throws IOException {
-        Request.Builder requestBuilder = buildRequest(id, "empty");
-        RequestBody body = RequestBody.create(null, new byte[0]);
+    protected HttpUrl buildFileUrl(String path) {
+        HttpUrl.Builder builder = new HttpUrl.Builder()
+                .host(baseUrl)
+                .addPathSegment("storage")
+                .addPathSegment("v1")
+                .addPathSegment("object");
 
-        Request request = requestBuilder.post(body).build();
+        String[] paths = path.split("/");
+        for (String p : paths) {
+            builder.addPathSegment(p);
+        }
 
-        ResponseBody responseBody = client.newCall(request).execute().body();
+        if (httpsEnabled) {
+            builder.scheme("https");
+        }
 
-        return gson.fromJson(responseBody.string(), MessageResponse.class);
+        return builder.build();
     }
 
-    public MessageResponse deleteBucket(String id) throws IOException {
-        Request.Builder requestBuilder = buildRequest(id);
-        Request request = requestBuilder.delete().build();
-        ResponseBody responseBody = client.newCall(request).execute().body();
-
-        return gson.fromJson(responseBody.string(), MessageResponse.class);
-    }
-
-    protected HttpUrl buildFileUrl(String action) {
-        return buildFileUrl(action, "");
-    }
-
-    protected HttpUrl buildFileUrl(String action, String bucketId) {
+    protected HttpUrl buildFileUrl(String action, String bucketId, String supabasePath) {
         HttpUrl.Builder builder = new HttpUrl.Builder()
                 .host(baseUrl)
                 .addPathSegment("storage")
@@ -118,6 +128,10 @@ public class StorageFileAPI {
             builder.addPathSegment(bucketId);
         }
 
+        if (supabasePath != null && !supabasePath.isEmpty()) {
+            builder.addPathSegment(supabasePath);
+        }
+
         if (httpsEnabled) {
             builder.scheme("https");
         }
@@ -125,8 +139,8 @@ public class StorageFileAPI {
         return builder.build();
     }
 
-    protected Request.Builder buildRequest(String action) {
-        HttpUrl httpUrl = buildFileUrl(action);
+    protected Request.Builder buildRequest(String path) {
+        HttpUrl httpUrl = buildFileUrl(path);
 
         Request.Builder builder = new Request.Builder();
         requestDecorator.decorate(builder);
@@ -134,7 +148,11 @@ public class StorageFileAPI {
     }
 
     protected Request.Builder buildRequest(String action, String bucketId) {
-        HttpUrl httpUrl = buildFileUrl(action, bucketId);
+        return buildRequest(action, bucketId, "");
+    }
+
+    protected Request.Builder buildRequest(String action, String bucketId, String supabasePath) {
+        HttpUrl httpUrl = buildFileUrl(action, bucketId, supabasePath);
 
         Request.Builder builder = new Request.Builder();
         requestDecorator.decorate(builder);

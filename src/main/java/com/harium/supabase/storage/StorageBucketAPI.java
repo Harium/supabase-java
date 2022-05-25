@@ -3,6 +3,7 @@ package com.harium.supabase.storage;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.harium.supabase.RequestDecorator;
+import com.harium.supabase.common.MessageResponse;
 import okhttp3.*;
 
 import java.io.IOException;
