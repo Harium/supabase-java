@@ -51,6 +51,14 @@ public class StorageAPI {
         return gson.fromJson(responseBody.string(), bucketListClass);
     }
 
+    public Bucket getBucket(String id) throws IOException {
+        Request.Builder requestBuilder = buildRequest(id);
+        Request request = requestBuilder.get().build();
+
+        ResponseBody responseBody = client.newCall(request).execute().body();
+        return gson.fromJson(responseBody.string(), Bucket.class);
+    }
+
     protected HttpUrl buildBucketUrl(String bucketId) {
         HttpUrl.Builder builder = new HttpUrl.Builder()
                 .host(baseUrl)

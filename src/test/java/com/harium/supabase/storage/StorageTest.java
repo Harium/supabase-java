@@ -32,4 +32,11 @@ public class StorageTest {
         assertTrue(bucketList.isEmpty());
     }
 
+    @Test
+    @Ignore
+    public void testGetBucket() throws IOException {
+        Bucket bucket = supabaseClient.storage().getBucket("hello");
+        assertTrue(bucket.isPublic);
+    }
+
 }
