@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.harium.supabase</groupId>
     <artifactId>core</artifactId>
-    <version>0.0.1</version>
+    <version>0.0.2</version>
     <packaging>jar</packaging>
     <name>Supabase Java Client</name>
     <description>A Supabase client made in Java</description>

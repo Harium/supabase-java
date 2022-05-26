@@ -1,9 +1,13 @@
 # supabase-java
-A Java client for [Supabase](https://supabase.com/).
+[![CircleCI](https://circleci.com/gh/Harium/supabase-java.svg?style=svg)](https://circleci.com/gh/Harium/supabase-java)
+[![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.harium.supabase/core/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.harium.supabase/core/)
+
+An unofficial Java client for [Supabase](https://supabase.com/).
 
 ### Features
 
-Currently, this library supports database operations only
+Currently, this library has basic support to database operations and storage.
+
 
 ### Usage
 ```java
@@ -19,5 +23,4 @@ supabase.storage().upload("mybucket/test.txt", new byte[]{1,2,3,4,5});
 
 #### Not implemented yet
 - Authentication
-- Storage
 - ...
